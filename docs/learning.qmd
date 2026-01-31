@@ -1,0 +1,26 @@
+---
+title: "Reproducible documents"
+author: "Hannah Caldwell"
+format: html
+editor: visual
+---
+
+```{r setup}
+library(tidyverse)
+```
+
+## About me
+
+1.  Hannah Grace Caldwell
+2.  Department of Nutrition, Exercise and Sports
+
+-   August Krogh Institute
+-   University of Copenhagen
+
+I am a **Canadian** working in *Denmark*. I am a cardiovascular exercise physiologist.
+
+## Simple code
+
+```{r}
+3 * 3
+```
