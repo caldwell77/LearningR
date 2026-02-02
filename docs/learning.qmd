@@ -4,7 +4,7 @@ author: "Hannah Caldwell"
 format: html
 editor: visual
 ---
-test for git
+test for git. Remote to local
 
 ```{r setup}
 #| message: false
