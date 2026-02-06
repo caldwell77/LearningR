@@ -1,0 +1,156 @@
+---
+# Uses Quarto metadata: https://quarto.org/docs/journals/authors.html
+title: "Reproducible Research Report"
+author:
+  - name: "Hannah Caldwell"
+    orcid: "0000-0001-6072-7277"
+    affiliations: 
+        - name: "August Krogh Institute"
+        - dept: "Nutrition, Exercise and Sports"
+        - inst: "University of Copenhagen"
+date: last-modified
+format: html
+execute:
+  echo: false
+---
+
+```{r setup}
+#| message: false
+#| warning: false
+library(tidyverse)
+SUA_CVDs_risk_factors_data <- read.csv(here::here("data/SUA_CVDs_risk_factors.csv"))
+```
+
+## Age, BMI, grouped by sex
+
+```{r}
+# Checking distribution of sex
+
+#| fig-cap: "Discrete plot of sex"
+#| label: fig-sex-bar
+ggplot(SUA_CVDs_risk_factors_data, aes(x = sex)) +
+  geom_bar()
+```
+
+```{r}
+#| tbl-cap: "Mean values of Age and BMI for each sex."
+#| label: tbl-mean-age-bmi
+SUA_CVDs_risk_factors_data |>
+  mutate(sex_label = if_else(sex == 1, "female", "male")) |>
+  group_by(sex_label) |>
+  summarise(
+    "Age (yrs)" = round(mean(Age), 1),
+    "BMI (kg/m^2^)" = round(mean(BMI), 1)
+  ) |>
+  rename("Sex" = sex_label) |>
+  ungroup() |>
+  knitr::kable()
+```
+
+
+## Age, BMI, SBP, DBP, grouped by hypertension
+
+```{r}
+# Identify cutoff for hypertension criteria
+
+SUA_CVDs_risk_factors_data |>
+  filter(SBP > 145, hypertension == 1)
+```
+
+```{r}
+#| tbl-cap: "Mean values of Age, BMI, SBP, and DBP for hypertensive vs non-hypertensive."
+#| label: tbl-mean-age-bmi-sbp-dbp-hypertension
+SUA_CVDs_risk_factors_data |>
+  mutate(hypertension_label = if_else(hypertension == 1, "non-hypertensive", "hypertensive")) |>
+  group_by(hypertension_label) |>
+  summarise(
+    "Age (yrs)" = round(mean(Age), 1),
+    "BMI (kg/m^2^)" = round(mean(BMI), 1),
+    "SBP (mmHg)" = round(mean(SBP), 0),
+    "DBP (mmHg)" = round(mean(DBP), 0)
+  ) |>
+  rename("Hypertension status" = hypertension_label) |>
+  ungroup() |>
+  knitr::kable()
+```
+See @tbl-mean-age-bmi-sbp-dbp-hypertension
+
+## Age, BMI, SBP, DBP, grouped by hyperglycemia
+
+```{r}
+# Identify cutoff for hyperglycemia criteria
+
+SUA_CVDs_risk_factors_data |>
+  filter(FBG > 7, hyperglycemia == 1)
+```
+
+```{r}
+#| tbl-cap: "Mean values of Age, BMI, SBP, and DBP for hyperglycemic vs non-hyperglycemic."
+#| label: tbl-mean-age-bmi-sbp-dbp-hyperglycemia
+SUA_CVDs_risk_factors_data |>
+  mutate(hyperglycemia_label = if_else(hyperglycemia == 1, "non-hyperglycemic", "hyperglycemic")) |>
+  group_by(hyperglycemia_label) |>
+  summarise(
+    "Age (yrs)" = round(mean(Age), 1),
+    "BMI (kg/m^2^)" = round(mean(BMI), 1),
+    "SBP (mmHg)" = round(mean(SBP), 0),
+    "DBP (mmHg)" = round(mean(DBP), 0)
+  ) |>
+  rename("Glycemia status" = hyperglycemia_label) |>
+  ungroup() |>
+  knitr::kable()
+```
+
+## Histogram of BMI with hyperglycemia
+
+```{r}
+SUA_CVDs_risk_factors_data |>
+  mutate(hyperglycemia_label = if_else(
+    hyperglycemia == 1, 
+    "non-hyperglycemic", 
+    "hyperglycemic"
+  )) |>
+  ggplot(aes(x = BMI, fill = fct_rev(hyperglycemia_label))) +
+  geom_histogram(position = "identity", alpha = 0.8, bins = 30) +
+  scale_fill_manual(values = c("non-hyperglycemic" = "#97A6A0", "hyperglycemic" = "#164C45")) +
+  labs(fill = "Glycemia status")
+
+SUA_CVDs_risk_factors_data |>
+  mutate(hyperglycemia_label = if_else(
+    hyperglycemia == 1, 
+    "non-hyperglycemic", 
+    "hyperglycemic"
+  )) |>
+  ggplot(aes(x = BMI)) +
+    geom_histogram(
+      binwidth = 1,
+      fill = "#164C45"
+    ) +
+    facet_grid(. ~ hyperglycemia_label) +
+    labs(
+      title = "Distribution of BMI by Hyperglycemia Status",
+      x = "Body Mass Index (BMI)",
+      y = "Count"
+    ) +
+  theme_minimal()
+```
+
+## Scatter plot of SBP vs DBP with hypertension
+
+```{r}
+SUA_CVDs_risk_factors_data |>
+  mutate(hypertension_label = if_else(
+    hypertension == 1, 
+    "non-hypertensive", 
+    "hypertensive"
+  )) |>
+  ggplot(aes(x = DBP, y = SBP, colour = hypertension_label)) +
+  geom_point() +
+  #geom_smooth() +
+  labs(colour = "Hypertension status") +
+  scale_color_manual(
+    values = c("#164C45","#97A6A0")
+  ) +
+  theme_minimal()
+```
+
